@@ -1,0 +1,9 @@
+
+---
+- name: Create WildFly download tmp directory
+  file: path="{{wildfly_download_tmpdir}}" state=directory
+
+- name: Download WildFly app server distro
+  get_url:
+    url="{{wildfly_download_url}}"
+    dest="{{wildfly_download_tmpdir}}/{{wildfly_distro_filename}}"

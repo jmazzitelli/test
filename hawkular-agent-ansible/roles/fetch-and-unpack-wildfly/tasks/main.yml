@@ -1,0 +1,10 @@
+# This only works with Ansible 2.0 (because unarchive src is an http URL)
+---
+  - name: Create WildFly installation directory
+    file: path="{{wildfly_install_dir}}" state=directory mode=0755
+
+  - name: Download and unpack WildFly app server
+    unarchive:
+      src="{{wildfly_download_url}}"
+      dest="{{wildfly_install_dir}}"
+      copy=no

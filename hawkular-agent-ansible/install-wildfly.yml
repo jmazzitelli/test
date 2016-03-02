@@ -1,0 +1,6 @@
+
+---
+- hosts: all
+  roles:
+    - fetch-wildfly
+    - unpack-wildfly

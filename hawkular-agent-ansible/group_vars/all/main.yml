@@ -1,0 +1,7 @@
+
+---
+wildfly_version:         "10.0.0.Final"
+wildfly_distro_filename: "wildfly-{{wildfly_version}}.zip"
+wildfly_download_url:    "http://download.jboss.org/wildfly/{{wildfly_version}}/{{wildfly_distro_filename}}"
+wildfly_download_tmpdir: "/tmp/wildfly-download"
+wildfly_install_dir:     "/tmp/wildfly-installation"
