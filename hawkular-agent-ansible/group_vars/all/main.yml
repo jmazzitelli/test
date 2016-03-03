@@ -5,3 +5,10 @@ wildfly_distro_filename: "wildfly-{{wildfly_version}}.zip"
 wildfly_download_url:    "http://download.jboss.org/wildfly/{{wildfly_version}}/{{wildfly_distro_filename}}"
 wildfly_download_tmpdir: "/tmp/wildfly-download"
 wildfly_install_dir:     "/tmp/wildfly-installation"
+
+hawkular_server_url:             "http://localhost:8080"
+hawkular_download_tmpdir:        "/tmp/hawkular-download"
+hawkular_server_url_username:    jdoe
+hawkular_server_url_password:    password
+hawkular_wildfly_agent_username: jdoe
+hawkular_wildfly_agent_password: password

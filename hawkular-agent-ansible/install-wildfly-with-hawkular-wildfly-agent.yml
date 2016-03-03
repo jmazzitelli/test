@@ -1,0 +1,7 @@
+
+---
+- hosts: all
+  roles:
+    - fetch-wildfly
+    - unpack-wildfly
+    - fetch-and-install-hawkular-wildfly-agent
