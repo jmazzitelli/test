@@ -1,10 +1,10 @@
-To configure:
+* To configure:
 
-hosts: lists all the hosts where you want to put your WildFly Servers or where your WildFly Servers are
-group_vars/wildfly-servers/main.yml: configure the location of the WildFly Servers and credentials
+1. *hosts*: lists all the hosts where you want to put your WildFly Servers or where your WildFly Servers are
+2. *group_vars/wildfly-servers/main.yml*: configure the location of the WildFly Servers and credentials
 
-To run:
+* To run:
 
-````
+```
 ansible-playbook -i hosts install-wildfly-with-hawkular-wildfly-agent.yml
-````
+```
