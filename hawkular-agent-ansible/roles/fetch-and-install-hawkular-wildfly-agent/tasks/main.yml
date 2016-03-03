@@ -1,9 +1,5 @@
 
 ---
-- name: Generate Temporary Encryption Key
-  shell: "tr -cd '0-9a-z' < /dev/urandom | head -c 30; echo"
-  register: hawkular_tmp_encryption_key
-
 - name: Create Hawkular download tmp directory
   file: path="{{hawkular_download_tmpdir}}" state=directory
 
@@ -17,17 +13,18 @@
   #  password="{{hawkular_server_url_password}}"
   #  force_basic_auth=true
   #  method=POST
-  #  body="username={{hawkular_wildfly_agent_username}}&password={{hawkular_wildfly_agent_password}}&encryption-key={{hawkular_tmp_encryption_key.stdout}}"
+  #  body=""
   #  follow_redirects=all
   #  validate_certs=no
 
   shell:
-    "curl --silent --show-error --create-dirs --user '{{hawkular_server_url_username}}:{{hawkular_server_url_password}}' --output '{{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar' --data 'username={{hawkular_wildfly_agent_username}}&password={{hawkular_wildfly_agent_password}}&encryption-key={{hawkular_tmp_encryption_key.stdout}}' {{hawkular_server_url}}/hawkular/wildfly-agent/installer"
+    "curl --silent --show-error --create-dirs --user '{{hawkular_server_url_username}}:{{hawkular_server_url_password}}' --output '{{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar' {{hawkular_server_url}}/hawkular/wildfly-agent/installer"
 
 - name: Run the Hawkular WildFly Agent installer
   command:
     "java -jar {{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar
-      --encryption-key={{hawkular_tmp_encryption_key.stdout}}
+      --username={{hawkular_wildfly_agent_username}}
+      --password={{hawkular_wildfly_agent_password}}
       --target-location={{wildfly_install_dir}}/wildfly-{{wildfly_version}}
       --server-url={{hawkular_server_url}}
       --feed-id={{ansible_default_ipv4.address}}"
