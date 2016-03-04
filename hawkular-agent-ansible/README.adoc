@@ -15,6 +15,8 @@ ansible-playbook -i hosts install-wildfly-with-hawkular-wildfly-agent.yml
 ansible-playbook -i hosts start-wildfly.yml
 ```
 
+NOTE: If you are running multiple WildFly application servers on the same machine, you can either change the _wildfly_bind_address_ variable or increase the _wildfly_port_offset_ variable (both defined in the _group_vars/wildfly-servers/main.yml_ file or pass on the ansible-playbook command line via _--extra-vars "name=value"_)
+
 * To stop a WildFly application server:
 
 ```
