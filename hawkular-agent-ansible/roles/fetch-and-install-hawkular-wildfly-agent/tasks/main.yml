@@ -29,15 +29,10 @@
     tmp_subsystem_snippet_option: "--subsystem-snippet={{hawkular_download_tmpdir}}/subsystem-snippet.xml"
   when: hawkular_wildfly_agent_use_subsystem_snippet == true
 
-- name: Do not use the custom subsystem snippet if it is not to be used
-  set_fact:
-    tmp_subsystem_snippet_option: ""
-  when: hawkular_wildfly_agent_use_subsystem_snippet == false
-
 - name: Run the Hawkular WildFly Agent installer
   command:
     "java -jar {{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar
-      {{tmp_subsystem_snippet_option}}
+      {{tmp_subsystem_snippet_option|default('')}}
       --username={{hawkular_wildfly_agent_username}}
       --password={{hawkular_wildfly_agent_password}}
       --target-location={{wildfly_install_dir}}/{{wildfly_distro_root_dir}}
