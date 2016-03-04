@@ -1,0 +1,4 @@
+
+---
+- name: Stop WildFly application server
+  shell: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/jboss-cli.sh --connect command=/:shutdown"

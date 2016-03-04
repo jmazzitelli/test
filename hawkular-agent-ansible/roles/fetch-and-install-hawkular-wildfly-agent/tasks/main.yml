@@ -25,9 +25,9 @@
     "java -jar {{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar
       --username={{hawkular_wildfly_agent_username}}
       --password={{hawkular_wildfly_agent_password}}
-      --target-location={{wildfly_install_dir}}/wildfly-{{wildfly_version}}
+      --target-location={{wildfly_install_dir}}/{{wildfly_distro_root_dir}}
       --server-url={{hawkular_server_url}}
-      --feed-id={{ansible_default_ipv4.address}}"
+      --feed-id={{wildfly_bind_address}}"
 
 - name: Remove the Hawkular WildFly Agent installer
   file: path="{{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar" state=absent
