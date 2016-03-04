@@ -15,9 +15,14 @@ wildfly_port_offset:     0
 # For fetching and installing a Hawkular WildFly Agent
 hawkular_server_url:             "http://localhost:8080"
 hawkular_download_tmpdir:        "/tmp/hawkular-download"
-hawkular_server_url_username:    jdoe
-hawkular_server_url_password:    password
-hawkular_wildfly_agent_username: jdoe
-hawkular_wildfly_agent_password: password
-# for the agent to autogenerate its own feed ID, set to this an empty value
+hawkular_server_url_username:    "jdoe"
+hawkular_server_url_password:    "password"
+hawkular_wildfly_agent_username: "jdoe"
+hawkular_wildfly_agent_password: "password"
+
+# if the agent is to run in metrics only mode, a tenant ID must also be set
+hawkular_wildfly_agent_metrics_only: "false"
+hawkular_wildfly_agent_tenant_id:
+
+# for the agent to autogenerate its own feed ID, set this to an empty value
 hawkular_wildfly_agent_feed_id:  "{{ansible_default_ipv4.address}}"
