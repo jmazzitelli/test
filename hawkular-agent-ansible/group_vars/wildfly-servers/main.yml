@@ -7,6 +7,7 @@ wildfly_download_url:    "http://download.jboss.org/wildfly/{{wildfly_version}}/
 wildfly_download_tmpdir: "/tmp/wildfly-download"
 wildfly_install_dir:     "/tmp/wildfly-installation"
 wildfly_bind_address:    "{{ansible_default_ipv4.address}}"
+wildfly_port_offset:     0
 
 hawkular_server_url:             "http://localhost:8080"
 hawkular_download_tmpdir:        "/tmp/hawkular-download"
@@ -14,3 +15,4 @@ hawkular_server_url_username:    jdoe
 hawkular_server_url_password:    password
 hawkular_wildfly_agent_username: jdoe
 hawkular_wildfly_agent_password: password
+hawkular_wildfly_agent_feed_id:  "{{ansible_default_ipv4.address}}"
