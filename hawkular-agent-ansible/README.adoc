@@ -5,7 +5,7 @@ This set of Ansible playbooks/roles allows you to install WildFly application se
 1. *hosts*: Lists all the hosts where you want to put your WildFly application servers or where your existing WildFly application servers are.
 2. *group_vars/wildfly-servers/main.yml*: Configures the file system locations of the WildFly application servers, credentials to use to obtain and run the Hawkular WildFly agent, and other things.
 
-* To install a WildFly application server that is monitored by a Hawkular WildFly Agent:
+* To install WildFly application servers that are monitored by Hawkular WildFly Agents:
 
 ```
 ansible-playbook -i hosts install-wildfly-with-hawkular-wildfly-agent.yml
