@@ -20,9 +20,24 @@
   shell:
     "curl --silent --show-error --create-dirs --user '{{hawkular_server_url_username}}:{{hawkular_server_url_password}}' --output '{{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar' {{hawkular_server_url}}/hawkular/wildfly-agent/installer"
 
+- name: Copy the custom subsystem snippet configuration file if it is to be used
+  copy: src=subsystem-snippet.xml dest={{hawkular_download_tmpdir}}/subsystem-snippet.xml
+  when: hawkular_wildfly_agent_use_subsystem_snippet == true
+
+- name: Use the custom subsystem snippet if it is to be used
+  set_fact:
+    tmp_subsystem_snippet_option: "--subsystem-snippet={{hawkular_download_tmpdir}}/subsystem-snippet.xml"
+  when: hawkular_wildfly_agent_use_subsystem_snippet == true
+
+- name: Do not use the custom subsystem snippet if it is not to be used
+  set_fact:
+    tmp_subsystem_snippet_option: ""
+  when: hawkular_wildfly_agent_use_subsystem_snippet == false
+
 - name: Run the Hawkular WildFly Agent installer
   command:
     "java -jar {{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar
+      {{tmp_subsystem_snippet_option}}
       --username={{hawkular_wildfly_agent_username}}
       --password={{hawkular_wildfly_agent_password}}
       --target-location={{wildfly_install_dir}}/{{wildfly_distro_root_dir}}
@@ -32,5 +47,5 @@
       --tenant-id={{hawkular_wildfly_agent_tenant_id}}"
 
 - name: Remove the Hawkular WildFly Agent installer
-  file: path="{{hawkular_download_tmpdir}}/hawkular-wildfly-agent-installer.jar" state=absent
+  file: path="{{hawkular_download_tmpdir}}" state=absent
 

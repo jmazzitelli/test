@@ -20,9 +20,13 @@ hawkular_server_url_password:    "password"
 hawkular_wildfly_agent_username: "jdoe"
 hawkular_wildfly_agent_password: "password"
 
-# if the agent is to run in metrics only mode, a tenant ID must also be set
+# If the agent is to run in metrics only mode, a tenant ID must also be set
 hawkular_wildfly_agent_metrics_only: "false"
 hawkular_wildfly_agent_tenant_id:
 
-# for the agent to autogenerate its own feed ID, set this to an empty value
+# For the agent to autogenerate its own feed ID, set this to an empty value
 hawkular_wildfly_agent_feed_id:  "{{ansible_default_ipv4.address}}"
+
+# If you want to use the fully customized subsystem role file, set this to true
+# and make sure the role file "subsystem-snippet.xml" is configured
+hawkular_wildfly_agent_use_subsystem_snippet: false
