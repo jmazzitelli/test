@@ -1,0 +1,25 @@
+
+---
+- name: Get home directory for WildFly application server
+  shell: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/jboss-cli.sh
+    --connect
+    'command=/core-service=server-environment:read-attribute(name=home-dir)'"
+  register: tmp_home_dir
+
+- debug: msg="Home Directory={{tmp_home_dir.stdout}}"
+
+- name: Get running mode for WildFly application server
+  shell: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/jboss-cli.sh
+    --connect
+    'command=/:read-attribute(name=running-mode)'"
+  register: tmp_running_mode
+
+- debug: msg="Running Mode={{tmp_running_mode.stdout}}"
+
+- name: Get server state for WildFly application server
+  shell: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/jboss-cli.sh
+    --connect
+    'command=/:read-attribute(name=server-state)'"
+  register: tmp_server_state
+
+- debug: msg="Server State={{tmp_server_state.stdout}}"
