@@ -1,7 +1,9 @@
-* To configure:
+This set of Ansible playbooks/roles allows you to install WildFly application servers with embedded Hawkular WildFly Agents that monitor those WildFly instances.
 
-1. *hosts*: lists all the hosts where you want to put your WildFly Servers or where your WildFly Servers are
-2. *group_vars/wildfly-servers/main.yml*: configure the location of the WildFly Servers and credentials and other things
+* To configure the Ansible playbooks/roles:
+
+1. *hosts*: Lists all the hosts where you want to put your WildFly application servers or where your existing WildFly application servers are.
+2. *group_vars/wildfly-servers/main.yml*: Configures the file system locations of the WildFly application servers, credentials to use to obtain and run the Hawkular WildFly agent, and other things.
 
 * To install a WildFly application server that is monitored by a Hawkular WildFly Agent:
 
@@ -9,16 +11,24 @@
 ansible-playbook -i hosts install-wildfly-with-hawkular-wildfly-agent.yml
 ```
 
-* To start a WildFly application server:
+Once installed, you can start and stop the WildFly application servers, and get their statuses.
+
+NOTE: If you are running multiple WildFly application servers on the same machine, you must specify their bind addresses or port offsets by setting either the _wildfly_bind_address_ variable or increase the _wildfly_port_offset_ variable. Both are defined in the _group_vars/wildfly-servers/main.yml_ file or you may optionally pass one or both to the ansible-playbook via the command line option _--extra-vars "name1=value1 name2=value2"_)
+
+* To start the WildFly application servers:
 
 ```
 ansible-playbook -i hosts start-wildfly.yml
 ```
 
-NOTE: If you are running multiple WildFly application servers on the same machine, you can either change the _wildfly_bind_address_ variable or increase the _wildfly_port_offset_ variable (both defined in the _group_vars/wildfly-servers/main.yml_ file or pass on the ansible-playbook command line via _--extra-vars "name=value"_)
-
-* To stop a WildFly application server:
+* To stop the WildFly application servers:
 
 ```
 ansible-playbook -i hosts stop-wildfly.yml
+```
+
+* To see the statuses of the WildFly application servers:
+
+```
+ansible-playbook -i hosts status-wildfly.yml
 ```
