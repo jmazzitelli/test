@@ -1,8 +1,7 @@
 
-# This is a very simple shutdown role. If you have more than one WildFly
-# application server running on your machine, this might not shutdown the
-# one you expect.
-
 ---
 - name: Stop WildFly application server
-  shell: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/jboss-cli.sh --connect command=/:shutdown"
+  shell: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/jboss-cli.sh
+    --connect
+    controller=localhost:{{ 9990 + wildfly_port_offset|int }}
+    command=/:shutdown"
