@@ -1,0 +1,1 @@
+kinds = [ "mallet", "blade" ]
