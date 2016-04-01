@@ -61,4 +61,6 @@ print str(squares)
 cubes = map(multiply_numbers, [1,2,3], [1,2,3], [1,2,3]) # essentially returns the cubes
 print str(cubes)
 
-print "==="
+print "===reduce"
+print reduce(lambda x, y: x+y, [1, 2, 3, 4, 5])
+
