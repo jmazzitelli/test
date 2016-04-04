@@ -1,8 +1,0 @@
-
----
-- name: Start WildFly application server
-  shell: "nohup {{wildfly_install_dir}}/{{wildfly_distro_root_dir}}/bin/standalone.sh -b {{wildfly_bind_address}} -Djboss.socket.binding.port-offset={{wildfly_port_offset}} &"
-  args:
-    chdir: "{{wildfly_install_dir}}/{{wildfly_distro_root_dir}}"
-  environment:
-    LAUNCH_JBOSS_IN_BACKGROUND: true
