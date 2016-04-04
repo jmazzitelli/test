@@ -1,7 +1,0 @@
-
----
-- hosts: wildfly-servers
-  roles:
-    - fetch-wildfly
-    - unpack-wildfly
-    - fetch-and-install-hawkular-wildfly-agent

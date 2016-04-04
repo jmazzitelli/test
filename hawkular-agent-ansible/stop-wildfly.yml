@@ -1,7 +1,0 @@
-
-# NOTE: See the comments in the stop-wildfly role YAML file.
-
----
-- hosts: wildfly-servers
-  roles:
-    - stop-wildfly

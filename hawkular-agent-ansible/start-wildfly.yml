@@ -1,5 +1,0 @@
-
----
-- hosts: wildfly-servers
-  roles:
-    - start-wildfly
