@@ -1,6 +1,0 @@
-
----
-- hosts: wildfly-servers
-  roles:
-    - fetch-wildfly
-    - unpack-wildfly
