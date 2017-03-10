@@ -51,6 +51,7 @@ public class SimpleJVM implements SimpleMXBean {
 
     // JMX Operations
 
+    @Override
     public String testOperationPrimitive(String s, int i, boolean b, long l, double d, float f, short h, char c, byte y) {
         return String.format("string=%s, int=%s, boolean=%s, long=%s, double=%s, float=%s, short=%s, char=%s, byte=%s",
                              s,
@@ -64,6 +65,7 @@ public class SimpleJVM implements SimpleMXBean {
                              String.valueOf(y));
     }
 
+    @Override
     public String testOperation(String s, Integer i, Boolean b, Long l, Double d, Float f, Short h, Character c, Byte y) {
         return String.format("String=%s, Int=%s, Boolean=%s, Long=%s, Double=%s, Float=%s, Short=%s, Char=%s, Byte=%s",
                              s,
