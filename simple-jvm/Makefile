@@ -1,6 +1,6 @@
 JAR_FILE=simple-jvm.jar
 
-JAVAAGENT_FILE=$(shell ls -1 /home/mazz/source/hawkular-agent/hawkular-javaagent/target/hawkular-javaagent-*-jar-with-dependencies.jar)
+JAVAAGENT_FILE=$(shell ls -1 /home/mazz/source/hawkular-agent/hawkular-javaagent/target/hawkular-javaagent-*.jar)
 
 JAVAAGENT_CONFIG_FILE=config-jmx.yaml
 
