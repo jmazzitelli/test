@@ -147,6 +147,8 @@ resource-type-set-jmx:
       internal-name: status
     - name: Inventory Discovery Scan
       internal-name: fullDiscoveryScan
+    - name: Inventory Report
+      internal-name: inventoryReport
 - name: Test
   resource-type-jmx:
   - name: Simple
