@@ -33,6 +33,7 @@ public interface SimpleMXBean {
 
     // JMX Operations
 
+    void testOperationNoParams();
     String testOperationPrimitive(String s, int i, boolean b, long l, double d, float f, short h, char c, byte y);
     String testOperation(String s, Integer i, Boolean b, Long l, Double d, Float f, Short h, Character c, Byte y);
 

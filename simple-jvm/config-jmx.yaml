@@ -160,6 +160,8 @@ resource-type-set-jmx:
     - name: TestIntegerPrimitive
       attribute: TestIntegerPrimitive
     operation-jmx:
+    - name: testOperationNoParams
+      internal-name: testOperationNoParams
     - name: testOperation
       internal-name: testOperation
       params:

@@ -52,7 +52,13 @@ public class SimpleJVM implements SimpleMXBean {
     // JMX Operations
 
     @Override
+    public void testOperationNoParams() {
+        System.out.println("JMX operation testOperationNoParams has been invoked.");
+    }
+
+    @Override
     public String testOperationPrimitive(String s, int i, boolean b, long l, double d, float f, short h, char c, byte y) {
+        System.out.println("JMX operation testOperationPrimitive has been invoked.");
         return String.format("string=%s, int=%s, boolean=%s, long=%s, double=%s, float=%s, short=%s, char=%s, byte=%s",
                              s,
                              String.valueOf(i),
@@ -67,6 +73,7 @@ public class SimpleJVM implements SimpleMXBean {
 
     @Override
     public String testOperation(String s, Integer i, Boolean b, Long l, Double d, Float f, Short h, Character c, Byte y) {
+        System.out.println("JMX operation testOperation has been invoked.");
         return String.format("String=%s, Int=%s, Boolean=%s, Long=%s, Double=%s, Float=%s, Short=%s, Char=%s, Byte=%s",
                              s,
                              (i == null) ? "null" : i.toString(),
