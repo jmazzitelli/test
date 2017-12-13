@@ -15,6 +15,12 @@ compile:
 run:
 	${WILDFLY_HOME}/bin/standalone.sh
 
+kill:
+	pkill -f jboss-modules.jar
+
+put-server-in-reload-required:
+	${WILDFLY_HOME}/bin/jboss-cli.sh --connect '/subsystem=infinispan/cache-container=ejb/:write-attribute(name=statistics-enabled,value=true)'
+
 download-wildfly:
 	mkdir -p ${BUILD_DIR}
 	wget --output-document ${BUILD_DIR}/wildfly.zip 'http://download.jboss.org/wildfly/11.0.0.Final/wildfly-11.0.0.Final.zip'

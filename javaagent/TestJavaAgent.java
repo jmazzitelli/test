@@ -6,26 +6,26 @@ public class TestJavaAgent implements TestJavaAgentMXBean {
     public static void premain(String args) {
         Thread agentThread = new Thread(new Runnable() {
             public void run() {
+                TestJavaAgent bean = null;
                 try {
                     Thread.sleep(5000);
                     String name = "zztop:type=testjavaagent";
                     System.out.println("TestJavaAgent: Registering the MBean: " + name);
                     MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-                    TestJavaAgent bean = new TestJavaAgent();
+                    bean = new TestJavaAgent();
                     mbs.registerMBean(bean, new ObjectName(name));
-                    bean.doit();
                 } catch (Exception e) {
                     System.out.println("TestJavaAgent: Failed to register the MBean");
                     e.printStackTrace();
                 }
 
-                synchronized (TestJavaAgent.class) {
-                    System.out.println("TestJavaAgent: Going in a coma...");
+                while (bean != null) {
                     try {
-                        TestJavaAgent.class.wait();
+                        Thread.sleep(5000);
+                        bean.doit();
                     } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    System.out.println("TestJavaAgent: Woke up from coma and exiting.");
                 }
             }
         }, "Test Java Agent Thread");
@@ -72,6 +72,7 @@ public class TestJavaAgent implements TestJavaAgentMXBean {
                     str.append("FOUND IT: " + beanName + "\n");
                 }
             }
+            str.append("=============================================================\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
