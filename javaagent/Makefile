@@ -5,10 +5,11 @@ JAVAAGENT_OPT=-javaagent:${JAR_FILE}
 DEBUG_OPT=-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y
 
 compile:
+	echo "Premain-Class: TestJavaAgent" > ${BUILD_DIR}/MANIFEST.MF
 	rm -f *.class
-	javac *.java
 	rm -f ${JAR_FILE}
-	jar cfm ${JAR_FILE} MANIFEST.MF *.class
+	javac *.java
+	jar cfm ${JAR_FILE} ${BUILD_DIR}/MANIFEST.MF *.class
 	rm -f *.class
 
 run:
