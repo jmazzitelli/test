@@ -20,6 +20,7 @@ kill:
 
 put-server-in-reload-required:
 	${WILDFLY_HOME}/bin/jboss-cli.sh --connect '/subsystem=infinispan/cache-container=ejb/:write-attribute(name=statistics-enabled,value=true)'
+	${WILDFLY_HOME}/bin/jboss-cli.sh --connect '/subsystem=infinispan/cache-container=ejb/:write-attribute(name=statistics-enabled,value=false)'
 
 download-wildfly:
 	mkdir -p ${BUILD_DIR}
