@@ -1,0 +1,18 @@
+--- stats-filter-1.6.yaml	2020-06-02 11:10:29.476537126 -0400
++++ stats-filter-1.6.yaml.new	2020-06-02 09:59:26.434300000 -0400
+@@ -95,7 +95,14 @@
+               configuration: |
+                 {
+                   "debug": "false",
+-                  "stat_prefix": "istio"
++                  "stat_prefix": "istio",
++                  "metrics": [
++                   {
++                     "name": "requests_total",
++                     "dimensions": {
++                       "request_operation": "istio_operationId"
++                     }
++                   }]
+                 }
+               root_id: stats_inbound
+               vm_config:
