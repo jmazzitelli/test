@@ -1,1 +1,1 @@
-ansible-playbook ansible-test.yaml
+ansible-playbook -v ansible-roles.yaml

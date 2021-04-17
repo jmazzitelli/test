@@ -12,13 +12,12 @@
           accessible_namespaces:
           - test1
           - test2
-          - test3
 
   - debug:
       msg: "MAZZ START: {{ kiali_vars }}"
 
-  - name: Create additional Kiali roles on Kubernetes
-    include_tasks: process-additional-roles.yml
+  - name: Build additional Kiali roles yaml on Kubernetes
+    include_tasks: build-additional-roles-yaml.yml
     vars:
       process_resource_cluster: "kubernetes"
     loop: "{{ kiali_vars.deployment.accessible_namespaces }}"
@@ -27,3 +26,14 @@
     when:
     - is_k8s == True
     - '"**" not in kiali_vars.deployment.accessible_namespaces'
+
+  - name: Create additional Kiali roles on Kubernetes
+    k8s:
+      state: "present"
+      definition: "{{ all_additional_roles_yaml }}"
+    when:
+    - is_k8s == True
+
+  - name: Erase potentially large fact
+    set_fact:
+      all_additional_roles_yaml: {}
