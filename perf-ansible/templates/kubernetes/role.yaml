@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: role
+  namespace: {{ role_namespace }}
+  labels:
+    app: kiali

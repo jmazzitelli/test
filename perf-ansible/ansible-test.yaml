@@ -1,0 +1,29 @@
+- hosts: localhost
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: python3
+  tasks:
+
+  - set_fact:
+      is_k8s: true
+      kiali_vars:
+        deployment:
+          view_only_mode: false
+          accessible_namespaces:
+          - test1
+          - test2
+          - test3
+
+  - debug:
+      msg: "MAZZ START: {{ kiali_vars }}"
+
+  - name: Create additional Kiali roles on Kubernetes
+    include_tasks: process-additional-roles.yml
+    vars:
+      process_resource_cluster: "kubernetes"
+    loop: "{{ kiali_vars.deployment.accessible_namespaces }}"
+    loop_control:
+      loop_var: role_namespace
+    when:
+    - is_k8s == True
+    - '"**" not in kiali_vars.deployment.accessible_namespaces'
