@@ -1,0 +1,48 @@
+- hosts: localhost
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: python3
+  tasks:
+
+  - set_fact:
+      is_k8s: true
+      kiali_vars:
+        api:
+          namespaces:
+            label_selector: "kiali.io/member-of=istio-system"
+        deployment:
+          view_only_mode: false
+          accessible_namespaces:
+          - test1
+          - test2
+
+  - debug:
+      msg: "MAZZ START: {{ kiali_vars }}"
+
+  - name: Build additional Kiali label on namespaces yaml on Kubernetes
+    include_tasks: build-additional-namespace-label-yaml.yml
+    vars:
+      process_resource_cluster: "kubernetes"
+      # everything to the left of the = is the label name; to the right is the label value
+      the_namespace_label_name: "{{ kiali_vars.api.namespaces.label_selector | regex_replace('^(.*)=.*$', '\\1') }}"
+      the_namespace_label_value: "{{ kiali_vars.api.namespaces.label_selector | regex_replace('^.*=(.*)$', '\\1') }}"
+    loop: "{{ kiali_vars.deployment.accessible_namespaces }}"
+    loop_control:
+      loop_var: role_namespace
+    when:
+    - is_k8s == True
+    - '"**" not in kiali_vars.deployment.accessible_namespaces'
+
+  - debug:
+      msg: "FULL YAML:{{ all_additional_namespaces_label_yaml }}"
+
+  - name: Create additional Kiali label on namespaces on Kubernetes
+    k8s:
+      state: "present"
+      definition: "{{ all_additional_namespaces_label_yaml }}"
+    when:
+    - is_k8s == True
+
+  - name: Erase potentially large fact
+    set_fact:
+      all_additional_namespaces_label_yaml: {}
