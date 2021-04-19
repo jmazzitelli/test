@@ -42,6 +42,8 @@
       definition: "{{ all_additional_namespaces_label_yaml }}"
     when:
     - is_k8s == True
+    - all_additional_namespaces_label_yaml is defined
+    - all_additional_namespaces_label_yaml | length > 0
 
   - name: Erase potentially large fact
     set_fact:

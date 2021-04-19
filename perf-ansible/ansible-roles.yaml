@@ -33,6 +33,8 @@
       definition: "{{ all_additional_roles_yaml }}"
     when:
     - is_k8s == True
+    - all_additional_roles_yaml is defined
+    - all_additional_roles_yaml | length > 0
 
   - name: Erase potentially large fact
     set_fact:
