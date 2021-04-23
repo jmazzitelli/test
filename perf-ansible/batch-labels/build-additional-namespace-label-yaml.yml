@@ -1,4 +1,4 @@
-- name: "Build additional Kiali label on namespace yaml for [{{ process_resource_cluster }}] namespace [{{ role_namespace }}]"
+- name: Build additional Kiali label yaml for a namespace
   vars:
     namespace_label_yaml: |
       ---
@@ -10,4 +10,4 @@
           {{ the_namespace_label_name }}: {{ the_namespace_label_value }}
       ...
   set_fact:
-    all_additional_namespaces_label_yaml: "{{ (all_additional_namespaces_label_yaml | default('')) + namespace_label_yaml }}"
+    additional_namespaces_label_batch_yaml: "{{ (additional_namespaces_label_batch_yaml | default('')) + namespace_label_yaml }}"

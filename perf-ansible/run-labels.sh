@@ -1,1 +1,1 @@
-ansible-playbook -v ansible-labels.yml
+ansible-playbook -v ansible-labels.yaml

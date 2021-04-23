@@ -15,36 +15,21 @@
           accessible_namespaces:
           - test1
           - test2
+          - test3
+          - test4
+          - test5
 
   - debug:
       msg: "MAZZ START: {{ kiali_vars }}"
 
-  - name: Build additional Kiali label on namespaces yaml on Kubernetes
-    include_tasks: build-additional-namespace-label-yaml.yml
+  - name: Create additional Kiali label on all accessible namespaces
+    include_tasks: batch-labels/process-additional-namespace-label.yml
     vars:
-      process_resource_cluster: "kubernetes"
       # everything to the left of the = is the label name; to the right is the label value
       the_namespace_label_name: "{{ kiali_vars.api.namespaces.label_selector | regex_replace('^(.*)=.*$', '\\1') }}"
       the_namespace_label_value: "{{ kiali_vars.api.namespaces.label_selector | regex_replace('^.*=(.*)$', '\\1') }}"
-    loop: "{{ kiali_vars.deployment.accessible_namespaces }}"
+    loop: "{{ kiali_vars.deployment.accessible_namespaces | batch(lookup('env', 'NAMESPACE_BATCH_SIZE') | int | default(3, True)) | list }}"
     loop_control:
-      loop_var: role_namespace
+      loop_var: accessible_namespaces_batch
     when:
-    - is_k8s == True
     - '"**" not in kiali_vars.deployment.accessible_namespaces'
-
-  - debug:
-      msg: "FULL YAML:{{ all_additional_namespaces_label_yaml }}"
-
-  - name: Create additional Kiali label on namespaces on Kubernetes
-    k8s:
-      state: "present"
-      definition: "{{ all_additional_namespaces_label_yaml }}"
-    when:
-    - is_k8s == True
-    - all_additional_namespaces_label_yaml is defined
-    - all_additional_namespaces_label_yaml | length > 0
-
-  - name: Erase potentially large fact
-    set_fact:
-      all_additional_namespaces_label_yaml: {}
