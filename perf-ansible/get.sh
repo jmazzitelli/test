@@ -1,4 +1,4 @@
-NUM_NAMESPACES=${1:-2}
+NUM_NAMESPACES=${1:-$(cat num-namespaces.txt)}
 for i in $(seq ${NUM_NAMESPACES}); do
   echo "==NAMESPACE [test${i}]"
   echo "  Labels=$(kubectl get ns test${i} -o jsonpath='{.metadata.labels}')"
