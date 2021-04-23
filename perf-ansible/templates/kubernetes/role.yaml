@@ -1,7 +1,10 @@
+{% for namespace in role_namespaces %}
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: role
-  namespace: {{ role_namespace }}
+  namespace: {{ namespace }}
   labels:
     app: kiali
+{% endfor %}
