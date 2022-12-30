@@ -1,0 +1,11 @@
+Barrel ring hole:
+
+image:https://raw.githubusercontent.com/jmazzitelli/test/master/franchi-magazine-cap/mazzitelli-barrel-ring-hole.jpg[a]
+
+Barrel ring hole with the spring that popped out of it:
+
+image:https://raw.githubusercontent.com/jmazzitelli/test/master/franchi-magazine-cap/mazzitelli-barrel-ring-hole-spring.jpg[b]
+
+The spring measurement:
+
+image:https://raw.githubusercontent.com/jmazzitelli/test/master/franchi-magazine-cap/mazzitelli-barrel-ring-spring-measurement.jpg[c]
