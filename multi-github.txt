@@ -1,0 +1,239 @@
+# Multi-GitHub Account Setup (Set It and Forget It)
+
+Use this once to configure two GitHub accounts (old + new) on one machine. Afterward:
+- Cloning a repo in the “new org” folder automatically uses the **new account’s SSH key**.
+- Commits in that folder automatically use the **new account’s name/email**.
+- Repos elsewhere keep using your **old account** by default.
+
+---
+
+## 0) Prereqs & Notes
+- You can keep or adjust paths/emails/names to your own.
+- Replace:
+  - `oldaccount@example.com`, `Old Account Name`
+  - `newaccount@example.com`, `New Account Name`
+  - `new-org-name` (your GitHub organization slug)
+  - `~/source/neworg/` (the folder where you keep the new org’s repos)
+- Works on macOS, Linux, and Windows (PowerShell paths differ; examples show POSIX-style).
+
+---
+
+## 1) Create and register SSH keys for **each** GitHub account
+
+```bash
+# Create keys
+ssh-keygen -t ed25519 -C "oldaccount@example.com" -f ~/.ssh/id_ed25519_old
+ssh-keygen -t ed25519 -C "newaccount@example.com" -f ~/.ssh/id_ed25519_new
+
+# Start ssh-agent (macOS/Linux)
+eval "$(ssh-agent -s)"
+
+# Add keys to the agent
+ssh-add ~/.ssh/id_ed25519_old
+ssh-add ~/.ssh/id_ed25519_new
+````
+
+**Add the public keys to GitHub:**
+
+* Old account → add `~/.ssh/id_ed25519_old.pub` via **GitHub → Settings → SSH and GPG keys → New SSH key**
+* New account → add `~/.ssh/id_ed25519_new.pub` via **GitHub → Settings → SSH and GPG keys → New SSH key**
+
+**Optional macOS persistence (so you don’t re-add after reboot):**
+Create or edit `~/.ssh/config` and include:
+
+```ssh
+Host *
+    AddKeysToAgent yes
+    UseKeychain yes
+    IdentityFile ~/.ssh/id_ed25519_old
+    IdentityFile ~/.ssh/id_ed25519_new
+```
+
+---
+
+## 2) Tell SSH which key to use for which GitHub account (aliases)
+
+Append to `~/.ssh/config`:
+
+```ssh
+# === Default GitHub (old account alias) ===
+Host github.com-old
+    HostName github.com
+    User git
+    IdentitiesOnly yes
+    IdentityFile ~/.ssh/id_ed25519_old
+
+# === New GitHub account alias ===
+Host github.com-new
+    HostName github.com
+    User git
+    IdentitiesOnly yes
+    IdentityFile ~/.ssh/id_ed25519_new
+```
+
+> You will use these alias hosts (`github.com-old` and `github.com-new`) in your Git remotes.
+
+**Test auth:**
+
+```bash
+ssh -T git@github.com-old   # should greet OLD username
+ssh -T git@github.com-new   # should greet NEW username
+```
+
+---
+
+## 3) Set global Git identity (defaults to OLD account)
+
+Edit `~/.gitconfig` and set your default identity to the **old** account:
+
+```ini
+[user]
+    name = Old Account Name
+    email = oldaccount@example.com
+```
+
+> This applies everywhere unless overridden. We’ll override it automatically for repos under a specific folder in the next step.
+
+---
+
+## 4) Automatically switch identity by folder (Conditional include)
+
+Still in `~/.gitconfig`, add a conditional include that triggers when a repo lives inside `~/source/neworg/`:
+
+```ini
+[includeIf "gitdir:~/source/neworg/"]
+    path = ~/.gitconfig-neworg
+```
+
+> Note the trailing slash `/`. On Windows, use a path like `gitdir:C:/Users/you/source/neworg/`.
+
+Create `~/.gitconfig-neworg` with the **new** account identity:
+
+```ini
+[user]
+    name = New Account Name
+    email = newaccount@example.com
+```
+
+*(Optional)* If you use signed commits, include your signing settings in this file too.
+
+---
+
+## 5) Workflow going forward
+
+```bash
+# Create a home for the new org repos
+mkdir -p ~/source/neworg
+cd ~/source/neworg
+
+# Clone using the NEW-account SSH alias host
+git clone git@github.com-new:new-org-name/repo.git
+cd repo
+
+# Verify the repo picked up the NEW identity automatically
+git config --show-origin --get user.name
+git config --show-origin --get user.email
+
+# Make a test commit
+echo "ok" > README.check
+git add README.check
+git commit -m "Test commit as NEW account"
+git push  # should authenticate via github.com-new (NEW account)
+```
+
+**Result:**
+
+* Auth uses `~/.ssh/id_ed25519_new` because the remote host is `github.com-new`.
+* Commits carry `New Account Name <newaccount@example.com>` because the repo is under `~/source/neworg/`.
+
+---
+
+## 6) Cloning/creating repos with the OLD account
+
+Anywhere **outside** `~/source/neworg/`:
+
+```bash
+# Use the OLD alias host when cloning
+git clone git@github.com-old:old-username/another-repo.git
+
+# Commits use the global OLD identity by default
+```
+
+---
+
+## 7) Converting an existing clone to the right account (if needed)
+
+If you accidentally cloned with the wrong host or moved a repo into/out of the neworg folder, fix the remote and (optionally) the identity:
+
+```bash
+# Show current origin
+git remote -v
+
+# Switch origin to NEW account alias host
+git remote set-url origin git@github.com-new:new-org-name/repo.git
+
+# Or switch back to OLD account alias host
+git remote set-url origin git@github.com-old:old-username/repo.git
+
+# Verify which identity Git will use in this location
+git config --show-origin --get user.name
+git config --show-origin --get user.email
+```
+
+---
+
+## 8) HTTPS alternative (if you prefer tokens over SSH)
+
+* Use separate **Personal Access Tokens** for old vs new accounts.
+* Use separate remote URLs:
+
+  * `https://github.com/old-username/repo.git`
+  * `https://github.com/new-org-name/repo.git`
+* Let your OS credential manager store each token the first time you push/pull.
+* You can still use the **folder-based conditional include** in steps 3–4 for commit identity.
+
+---
+
+## 9) Quick troubleshooting
+
+* **`ssh -T git@github.com-new` still logs in as OLD user**
+
+  * Check `~/.ssh/config` for the `Host github.com-new` block.
+  * Ensure `IdentitiesOnly yes` and the correct `IdentityFile`.
+  * Run `ssh-add -l` to see which keys are loaded.
+  * Remove conflicting `~/.ssh/config` lines under `Host *` that force a single key.
+
+* **Commits show the wrong name/email**
+
+  * Run inside the repo: `git config --show-origin --get user.email`
+  * Ensure the repo is **physically inside** `~/source/neworg/` (or whatever path you used).
+  * Confirm `~/.gitconfig` has the `[includeIf "gitdir:~/source/neworg/"]` block and `~/.gitconfig-neworg` exists.
+
+* **Commits not linked to GitHub profile**
+
+  * Confirm the commit email is verified in the correct GitHub account.
+  * If using GitHub “noreply” email, set `user.email` to `YOUR_ID+USERNAME@users.noreply.github.com`.
+
+---
+
+## 10) One-time sanity checks
+
+```bash
+# Verify which config files are active for this repo
+git config --list --show-origin
+
+# Verify the remote host (should be github.com-new for NEW account)
+git remote -v
+
+# Verify SSH auth mapping
+ssh -T git@github.com-old
+ssh -T git@github.com-new
+```
+
+---
+
+### You’re done ✅
+
+* Repos under `~/source/neworg/` → NEW account (auth + commits).
+* Repos elsewhere → OLD account (auth + commits).
+* No manual switching needed.
