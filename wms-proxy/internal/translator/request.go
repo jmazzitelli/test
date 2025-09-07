@@ -1,24 +1,101 @@
 package translator
 
 import (
+	"context"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
+	"wms-proxy/internal/services"
+	"wms-proxy/internal/transform"
 	"wms-proxy/pkg/wms"
 )
 
 // TranslateWMSToArcGIS converts WMS GetMap parameters to ArcGIS REST export parameters
 func TranslateWMSToArcGIS(wmsParams *wms.WMSParams) (*wms.ArcGISParams, error) {
+	return TranslateWMSToArcGISWithTransform(wmsParams, nil)
+}
+
+// TranslateWMSToArcGISWithTransform converts WMS GetMap parameters to ArcGIS REST export parameters
+// with optional coordinate transformation
+func TranslateWMSToArcGISWithTransform(wmsParams *wms.WMSParams, transformer *transform.CoordinateTransformer) (*wms.ArcGISParams, error) {
+	bbox := wmsParams.BBOX
+	sourceSRS := wmsParams.GetSRS()
+	targetSRS := translateSRS(sourceSRS)
+
+	// If we have a transformer, check if transformation is needed
+	if transformer != nil && sourceSRS != "" && targetSRS != "" {
+		// The sourceSRS parameter indicates the coordinate system of the incoming bbox coordinates
+		fromCRS := transformer.NormalizeCRS(sourceSRS)
+		// The backend ArcGIS server expects coordinates in EPSG:3424 (New Jersey State Plane)
+		toCRS := "EPSG:3424"
+
+		// Only transform if the CRS are different
+		if fromCRS != toCRS {
+			transformedBBox, err := transformer.TransformBBox(bbox, fromCRS, toCRS)
+			if err != nil {
+				// Log the error but continue with original bbox
+				// In a production system, you might want to handle this differently
+				fmt.Printf("Warning: coordinate transformation failed: %v\n", err)
+			} else {
+				bbox = transformedBBox
+			}
+		}
+	}
+
 	arcgisParams := &wms.ArcGISParams{
-		BBOX:        wmsParams.BBOX,
+		BBOX:        bbox,
 		Size:        fmt.Sprintf("%d,%d", wmsParams.Width, wmsParams.Height),
 		Format:      translateFormat(wmsParams.Format),
-		BBoxSR:      translateSRS(wmsParams.GetSRS()),
-		ImageSR:     translateSRS(wmsParams.GetSRS()),
+		BBoxSR:      targetSRS,
+		ImageSR:     targetSRS,
 		Layers:      translateLayers(wmsParams.Layers),
 		Transparent: translateTransparent(wmsParams.Transparent),
 		DPI:         96,
+		F:           "image",
+	}
+
+	return arcgisParams, nil
+}
+
+// TranslateWMSToArcGISWithTransformAndBackendSR converts WMS GetMap parameters to ArcGIS REST export parameters
+// with coordinate transformation using dynamic backend SR detection
+func TranslateWMSToArcGISWithTransformAndBackendSR(wmsParams *wms.WMSParams, transformer *transform.CoordinateTransformer, srDetector *services.BackendSRDetector, ctx context.Context, servicePath string) (*wms.ArcGISParams, error) {
+	bbox := wmsParams.BBOX
+	sourceSRS := wmsParams.GetSRS()
+
+	// If we have a transformer and SR detector, use dynamic backend SR detection
+	if transformer != nil && srDetector != nil && sourceSRS != "" {
+		// The sourceSRS parameter indicates the coordinate system of the incoming bbox coordinates
+		fromCRS := transformer.NormalizeCRS(sourceSRS)
+
+		// Detect what spatial reference system the backend service expects
+		toCRS, err := srDetector.GetBackendSR(ctx, servicePath)
+		if err != nil {
+			// Log the error but continue with original bbox
+			fmt.Printf("Warning: failed to detect backend SR: %v\n", err)
+			toCRS = "EPSG:3424" // Fallback
+		}
+
+		// Only transform if the CRS are different
+		if fromCRS != toCRS {
+			transformedBBox, err := transformer.TransformBBox(bbox, fromCRS, toCRS)
+			if err != nil {
+				// Log the error but continue with original bbox
+				fmt.Printf("Warning: coordinate transformation failed: %v\n", err)
+			} else {
+				bbox = transformedBBox
+			}
+		}
+	}
+
+	arcgisParams := &wms.ArcGISParams{
+		BBOX:        bbox,
+		Size:        fmt.Sprintf("%d,%d", wmsParams.Width, wmsParams.Height),
+		Format:      translateFormat(wmsParams.Format),
+		Transparent: translateTransparent(wmsParams.Transparent),
+		Layers:      translateLayers(wmsParams.Layers),
 		F:           "image",
 	}
 
@@ -82,20 +159,29 @@ func translateSRS(srs string) string {
 		return "EPSG:3857" // Default to Web Mercator
 	}
 
+	originalSRS := strings.TrimSpace(srs)
+	upperSRS := strings.ToUpper(originalSRS)
+
 	// Handle common formats
-	srs = strings.ToUpper(srs)
-	if strings.HasPrefix(srs, "EPSG:") {
-		return srs
+	if strings.HasPrefix(upperSRS, "EPSG:") {
+		return upperSRS
 	}
 
 	// Handle some common variations
-	switch srs {
+	switch upperSRS {
 	case "3857", "900913":
 		return "EPSG:3857"
 	case "4326":
 		return "EPSG:4326"
+	case "3424":
+		return "EPSG:3424"
 	default:
-		return srs // Pass through as-is
+		// If it's just a number, add EPSG: prefix
+		if _, err := strconv.Atoi(originalSRS); err == nil {
+			return "EPSG:" + originalSRS
+		}
+		// Return original case for unrecognized values
+		return originalSRS
 	}
 }
 

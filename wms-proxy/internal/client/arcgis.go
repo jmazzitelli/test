@@ -2,10 +2,30 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
+
+// ServiceMetadata represents ArcGIS MapServer service metadata
+type ServiceMetadata struct {
+	SpatialReference struct {
+		WKID       int    `json:"wkid"`
+		LatestWKID int    `json:"latestWkid"`
+		WKT        string `json:"wkt"`
+	} `json:"spatialReference"`
+	SupportedQueryFormats interface{} `json:"supportedQueryFormats"` // Can be string or []string
+	MaxRecordCount        int         `json:"maxRecordCount"`
+	Capabilities          string      `json:"capabilities"`
+}
+
+// ArcGISClientInterface defines the interface for ArcGIS client operations
+type ArcGISClientInterface interface {
+	Get(ctx context.Context, url string) (*http.Response, error)
+	GetServiceMetadata(ctx context.Context, servicePath string) (*ServiceMetadata, error)
+}
 
 // ArcGISClient handles HTTP requests to ArcGIS REST API
 type ArcGISClient struct {
@@ -68,4 +88,38 @@ func (c *ArcGISClient) HealthCheck(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// GetServiceMetadata retrieves metadata for an ArcGIS MapServer service
+func (c *ArcGISClient) GetServiceMetadata(ctx context.Context, servicePath string) (*ServiceMetadata, error) {
+	// Remove /export suffix if present to get the service root
+	serviceRoot := strings.TrimSuffix(servicePath, "/export")
+
+	// Build metadata URL
+	metadataURL := c.baseURL + serviceRoot + "?f=json"
+
+	req, err := http.NewRequestWithContext(ctx, "GET", metadataURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create metadata request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "WMS-Proxy/1.0")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute metadata request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("metadata request failed with status: %d", resp.StatusCode)
+	}
+
+	var metadata ServiceMetadata
+	if err := json.NewDecoder(resp.Body).Decode(&metadata); err != nil {
+		return nil, fmt.Errorf("failed to decode metadata response: %w", err)
+	}
+
+	return &metadata, nil
 }

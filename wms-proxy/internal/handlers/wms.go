@@ -8,25 +8,31 @@ import (
 	"time"
 
 	"wms-proxy/internal/client"
+	"wms-proxy/internal/services"
+	"wms-proxy/internal/transform"
 	"wms-proxy/internal/translator"
 	"wms-proxy/pkg/wms"
 )
 
 // WMSHandler handles WMS requests and proxies them to ArcGIS REST API
 type WMSHandler struct {
-	arcgisClient *client.ArcGISClient
+	arcgisClient client.ArcGISClientInterface
 	logger       *slog.Logger
 	baseURL      string
 	servicePath  string
+	transformer  *transform.CoordinateTransformer
+	srDetector   *services.BackendSRDetector
 }
 
 // NewWMSHandler creates a new WMS handler
-func NewWMSHandler(arcgisClient *client.ArcGISClient, logger *slog.Logger, baseURL, servicePath string) *WMSHandler {
+func NewWMSHandler(arcgisClient client.ArcGISClientInterface, logger *slog.Logger, baseURL, servicePath string) *WMSHandler {
 	return &WMSHandler{
 		arcgisClient: arcgisClient,
 		logger:       logger,
 		baseURL:      baseURL,
 		servicePath:  servicePath,
+		transformer:  transform.NewCoordinateTransformer(),
+		srDetector:   services.NewBackendSRDetector(arcgisClient, logger),
 	}
 }
 
@@ -99,8 +105,8 @@ func (h *WMSHandler) handleGetCapabilities(w http.ResponseWriter, r *http.Reques
 
 // handleGetMap processes WMS GetMap requests
 func (h *WMSHandler) handleGetMap(w http.ResponseWriter, r *http.Request, wmsParams *wms.WMSParams) {
-	// Translate WMS parameters to ArcGIS parameters
-	arcgisParams, err := translator.TranslateWMSToArcGIS(wmsParams)
+	// Translate WMS parameters to ArcGIS parameters with coordinate transformation
+	arcgisParams, err := translator.TranslateWMSToArcGISWithTransformAndBackendSR(wmsParams, h.transformer, h.srDetector, r.Context(), h.servicePath)
 	if err != nil {
 		h.logger.Error("Failed to translate WMS parameters", "error", err)
 		translator.GenerateWMSError(w, "Parameter translation failed: "+err.Error(), http.StatusBadRequest)

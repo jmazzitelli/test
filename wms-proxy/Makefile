@@ -70,8 +70,9 @@ stop:
 clean: stop
 	@echo "Cleaning up images..."
 	-podman rmi $(IMAGE_NAME):$(IMAGE_TAG)
+	rm $(CURDIR)/wms-proxy || true
 	@echo "Cleaning up test files..."
-	@rm $(CURDIR)/test-*
+	@rm $(CURDIR)/test-* || true
 	@echo "Cleanup complete"
 
 # Show logs
